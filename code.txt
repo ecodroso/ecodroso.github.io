@@ -1,0 +1,75 @@
+"use strict"
+const jscad = require('@jscad/modeling')
+const { intersect, subtract, union } = jscad.booleans
+const { colorize } = jscad.colors
+const { translate } = jscad.transforms
+const { cube, sphere, cylinder, polyhedron, cylinderElliptic } = jscad.primitives
+
+
+
+
+
+var d1 = 88;
+var d2 = d1 + 3;
+var d3 = d1 - 5;
+var d5 = d2 + 10;
+var d6 = d5 + 5;
+
+var z1 = 5;
+
+var d4 = 8;
+var e4 = 2;
+
+
+
+var seg = 60
+
+
+
+function ring(d1, d2, h) {
+  return subtract(
+    cyl(d1, h),
+    cyl(d2, h)
+  )
+}
+
+function cyl(d, h) { return cylinder({radius:d/2, height:h, center:[0, 0, h/2], segments: seg})}
+
+
+function cone(d, h) {
+  return cylinderElliptic({height: h, startRadius: [d, d], endRadius: [0, 0], segments: seg})
+}
+
+
+
+
+function bague() {
+  var p1 = subtract(ring(d2, d3, z1), translate([0, 0, 2], ring(d1, d1-2, 100)))
+  var p2 = intersect(subtract(union(
+    translate([d2/2, 0, 0], cyl(d4, e4)),
+    translate([-d2/2, 0, 0], cyl(d4, e4)),
+    translate([0, d2/2, 0], cyl(d4, e4)),
+    translate([0, -d2/2, 0], cyl(d4, e4)),
+  ), cyl(d2, 100)),cone(d2+8, (d2+8)/2))
+
+  return union(p1, p2)
+}
+
+
+
+
+
+function main() {
+  const outer = subtract(
+    cube({ size: 20 }),
+    sphere({ radius: 6.8 })
+  )
+  const inner = intersect(
+    sphere({ radius: 10 }),
+    cube({ size: 20 })
+  )
+  //return ring(100, 80, 20)
+  return bague()
+}
+
+module.exports = { main }
